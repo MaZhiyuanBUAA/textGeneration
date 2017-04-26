@@ -35,36 +35,52 @@ class seq2seq(object):
         print('targets shape:',self.targets.get_shape())
         self.loss = tf.reduce_mean(tf.losses.sparse_softmax_cross_entropy(targets_,self.outputs))
         self.opt = tf.train.GradientDescentOptimizer(lr).minimize(self.loss)
-    def train(self,data,batch_size,max_epoch,save_step=10,display_step=10,save2='model/model_seq2seq.ckpt'):
+    def train(self,data,batch_size,max_epoch,save_step=10,display_step=10,save2='../model/model_seq2seq.ckpt'):
         num_steps = data.data_size//batch_size
         sess = tf.Session()
         init = tf.global_variables_initializer()
         saver = tf.train.Saver()
-        sess.run(init)
+	try:
+	    saver.restore(sess,save2)
+	    print('model loaded from %s'%save2)
+	except:
+	    print('create fresh model')
+            sess.run(init)
         for i in range(max_epoch):
             step = 0
             while step<num_steps:
                 source,target = data.get_batch(step,batch_size)
                 #_inputs = np.column_stack((source,target))
                 feed_dict = {self.inputs.name:source,self.targets.name:target}
-                cost,_ = sess.run([self.loss,self.opt],feed_dict=feed_dict)
+                outp,cost,_ = sess.run([self.outputs,self.loss,self.opt],feed_dict=feed_dict)
                 if step%display_step == 0:
                     print('epoch:%d,step:%d,cost:%f'%(i,step,cost))
                 if step%save_step == 0:
                     saver.save(sess,save2)
                     print('model saved in %s'%save2)
                 step += 1
-	    print('Do test')
-            source, target = data.get_testSet()
+	    print(10*'*'+'Do pseudo test'+10*'*')
+	    outp = np.reshape(np.argmax(outp,axis=1),[-1,data.pad_size])
+	    if batch_size>10:
+		test_size = 10
+	    else:
+		test_size = batch_size
+	    query = data.logits2sentence(source[0:test_size,:])
+            real_resp = data.logits2sentence(target[0:test_size,:])
+            pred_resp = data.logits2sentence(outp[0:test_size,:])
+	    for k in range(test_size):
+                print('Query:%s\nRResp:%s\nPResp:%s\n'%(query[k],real_resp[k],pred_resp[k]))
+	    print(10*'*'+'Do real test'+10*'*')
+            source, target = data.get_testSet(test_size)
             feed_dict = {self.inputs.name:source,self.targets.name:target}
-            outp, cost = sess.run(self.outputs,feed_dict=feed_dict)
-            outp = np.argmax(outp.reshape([-1,data.pad_size]),axis=1)
-            outp = outp.reshape([-1,data.pad_size])
+            outp, cost = sess.run([self.outputs,self.loss],feed_dict=feed_dict)
+            outp = np.argmax(outp,axis=1)
+            outp = np.reshape(outp,[-1,data.pad_size])
             query = data.logits2sentence(source)
             real_resp = data.logits2sentence(target)
             pred_resp = data.logits2sentence(outp)
-	    for i in range(outp.shape[0]):
-                print('Query:%s\nRResp:%s\nPResp:%s\n'%(query[i],real_resp[i],pred_resp[i]))
+	    for k in range(test_size):
+                print('Query:%s\nRResp:%s\nPResp:%s\n'%(query[k],real_resp[k],pred_resp[k]))
             data.shuffle_trainSet()
 
 class test_data:
