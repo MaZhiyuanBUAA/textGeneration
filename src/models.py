@@ -54,6 +54,17 @@ class seq2seq(object):
                     saver.save(sess,save2)
                     print('model saved in %s'%save2)
                 step += 1
+	    print('Do test')
+            source, target = data.get_testSet()
+            feed_dict = {self.inputs.name:source,self.targets.name:target}
+            outp, cost = sess.run(self.outputs,feed_dict=feed_dict)
+            outp = np.argmax(outp.reshape([-1,data.pad_size]),axis=1)
+            outp = outp.reshape([-1,data.pad_size])
+            query = data.logits2sentence(source)
+            real_resp = data.logits2sentence(target)
+            pred_resp = data.logits2sentence(outp)
+	    for i in range(outp.shape[0]):
+                print('Query:%s\nRResp:%s\nPResp:%s\n'%(query[i],real_resp[i],pred_resp[i]))
             data.shuffle_trainSet()
 
 class test_data:

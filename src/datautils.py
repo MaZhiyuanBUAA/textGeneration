@@ -118,6 +118,8 @@ class data_set(txt2logit_conf):
         self.trainSet = np.array([self.trainSet[i] for i in inds])
     def get_batch(self,n,batch_size):
         return self.trainSet[n*batch_size:(n+1)*batch_size,:],self.trainSet[n*batch_size:(n+1)*batch_size,self.pad_size:2*self.pad_size]
+    def get_testSet(self):
+	return self.testSet,self.testSet[:,self.pad_size:2*self.pad_size]
 
 
 class tianya(data_set):
