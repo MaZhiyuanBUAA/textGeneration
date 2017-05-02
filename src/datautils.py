@@ -28,7 +28,7 @@ class data_set(txt2logit_conf):
         self.data_logits = [[int(k) for k in ele.split(' ')] for ele in data_txt]
         f = open(vocab_path)
         self.vocab = json.loads(f.read())
-	self.vocab_inv = dict([(v,k) for k,v in self.vocab.items()])
+        self.vocab_inv = dict([(v,k) for k,v in self.vocab.items()])
         self.vocab_size = len(self.vocab)
         f.close()
         print('Info:\ndata_size:%d\nvocab_size:%d' % (self.data_size, self.vocab_size))
@@ -70,7 +70,7 @@ class data_set(txt2logit_conf):
         else:
             return tmp
     def logits2sentence(self,logits):
-	#logits:numpy.ndarry,dtype=np.int32
+        #logits:numpy.ndarry,dtype=np.int32
         logits = logits.astype(np.int32)
         assert len(logits.shape)==2
         sentences = []
@@ -131,13 +131,13 @@ class data_set(txt2logit_conf):
     def get_batch(self,n,batch_size):
         return self.trainSet[n*batch_size:(n+1)*batch_size,:],self.trainSet[n*batch_size:(n+1)*batch_size,self.pad_size:2*self.pad_size]
     def get_testSet(self,size=100):
-	shape_ = self.testSet.shape
-	if shape_[0]<size:
-	    print('%d test samples in total'%(shape_[0]))
-	    return None,None
-	else:
-	    tmp_ = np.row_stack(random.sample(list(self.testSet),size))
-	return tmp_,tmp_[:,self.pad_size:2*self.pad_size]
+        shape_ = self.testSet.shape
+        if shape_[0]<size:
+            print('%d test samples in total'%(shape_[0]))
+            return None,None
+        else:
+            tmp_ = np.row_stack(random.sample(list(self.testSet),size))
+            return tmp_,tmp_[:,self.pad_size:2*self.pad_size]
 
 
 class tianya(data_set):

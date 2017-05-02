@@ -40,11 +40,11 @@ class seq2seq(object):
         sess = tf.Session()
         init = tf.global_variables_initializer()
         saver = tf.train.Saver()
-	try:
-	    saver.restore(sess,save2)
-	    print('model loaded from %s'%save2)
-	except:
-	    print('create fresh model')
+        try:
+            saver.restore(sess,save2)
+            print('model loaded from %s'%save2)
+        except:
+            print('create fresh model')
             sess.run(init)
         for i in range(max_epoch):
             step = 0
@@ -59,18 +59,18 @@ class seq2seq(object):
                     saver.save(sess,save2)
                     print('model saved in %s'%save2)
                 step += 1
-	    print(10*'*'+'Do pseudo test'+10*'*')
-	    outp = np.reshape(np.argmax(outp,axis=1),[-1,data.pad_size])
-	    if batch_size>10:
-		test_size = 10
-	    else:
-		test_size = batch_size
-	    query = data.logits2sentence(source[0:test_size,:])
+            print(10*'*'+'Do pseudo test'+10*'*')
+            outp = np.reshape(np.argmax(outp,axis=1),[-1,data.pad_size])
+            if batch_size>10:
+                test_size = 10
+            else:
+                test_size = batch_size
+            query = data.logits2sentence(source[0:test_size,:])
             real_resp = data.logits2sentence(target[0:test_size,:])
             pred_resp = data.logits2sentence(outp[0:test_size,:])
-	    for k in range(test_size):
-                print('Query:%s\nRResp:%s\nPResp:%s\n'%(query[k],real_resp[k],pred_resp[k]))
-	    print(10*'*'+'Do real test'+10*'*')
+            for k in range(test_size):
+                    print('Query:%s\nRResp:%s\nPResp:%s\n'%(query[k],real_resp[k],pred_resp[k]))
+            print(10*'*'+'Do real test'+10*'*')
             source, target = data.get_testSet(test_size)
             feed_dict = {self.inputs.name:source,self.targets.name:target}
             outp, cost = sess.run([self.outputs,self.loss],feed_dict=feed_dict)
@@ -79,7 +79,7 @@ class seq2seq(object):
             query = data.logits2sentence(source)
             real_resp = data.logits2sentence(target)
             pred_resp = data.logits2sentence(outp)
-	    for k in range(test_size):
+            for k in range(test_size):
                 print('Query:%s\nRResp:%s\nPResp:%s\n'%(query[k],real_resp[k],pred_resp[k]))
             data.shuffle_trainSet()
 
